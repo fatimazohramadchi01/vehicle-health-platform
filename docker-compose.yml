@@ -1,0 +1,42 @@
+services:
+  recall-mock:
+    image: wiremock/wiremock:3.13.2
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings:ro
+
+  vehicle-analysis-service:
+    build:
+      context: .
+      dockerfile: vehicle-analysis-service/Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      SERVER_PORT: "8080"
+      RECALL_PROVIDER_BASE_URL: http://recall-mock:8080
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:analysisdb;DB_CLOSE_DELAY=-1
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - recall-mock
+
+  telemetry-service:
+    build:
+      context: .
+      dockerfile: telemetry-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: "8080"
+      ANALYSIS_SERVICE_BASE_URL: http://vehicle-analysis-service:8080
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:telemetrydb;DB_CLOSE_DELAY=-1
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: ""
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      TELEMETRY_SCHEDULER_ENABLED: "true"
+      TELEMETRY_SCHEDULER_POLL_INTERVAL_MS: "2000"
+      TELEMETRY_JOBS_BACKOFF_MS: "2000"
+    depends_on:
+      - vehicle-analysis-service

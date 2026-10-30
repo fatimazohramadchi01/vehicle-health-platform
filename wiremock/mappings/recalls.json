@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/recalls",
+    "queryParameters": {
+      "vin": {
+        "equalTo": "VF1RFA00567891234"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "vin": "VF1RFA00567891234",
+      "campaigns": [
+        {
+          "code": "RC-2026-014",
+          "description": "Contrôle faisceau électrique",
+          "status": "ACTIVE"
+        }
+      ]
+    }
+  }
+}
